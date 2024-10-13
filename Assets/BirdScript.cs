@@ -10,13 +10,18 @@ public class BirdScript : MonoBehaviour
     public Rigidbody2D myRigidbody;
     public float flapStrength;
     public AudioSource deadSFX;
-
+    public AudioSource flapSFX;
     public bool birdIsAlive = true;
+    public bool deadSFXPlayed = false;
     // Start is called before the first frame update
     void Start()
     {
         logic = GameObject.FindGameObjectWithTag("Logic").GetComponent<LogicScript>();
-        deadSFX = GetComponent<AudioSource>();
+        
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        deadSFX = audioSources[0];  // Second AudioSource for death
+        flapSFX = audioSources[1];  // First AudioSource for flapping
+        
     }
 
     // Update is called once per frame
@@ -26,12 +31,33 @@ public class BirdScript : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space) == true && birdIsAlive)
         {
             myRigidbody.velocity = Vector2.up * flapStrength;
+            flapSFX.Play();
         }
 
         if( birdIsAlive == false){
             
             myRigidbody.velocity = Vector2.up * -50;
         }
+
+        if (transform.position.y > 9.62 || transform.position.y < -9.62)
+        {
+            
+            if (birdIsAlive) // Trigger game over only once
+            {
+                birdIsAlive = false;
+                logic.gameOver();
+
+                if (!deadSFXPlayed) // Play the death sound only once
+                {
+                    deadSFX.Play();
+                    deadSFXPlayed = true;
+                    Debug.Log("yo");
+                }
+            }
+            
+
+        }
+        
         
     }
 
